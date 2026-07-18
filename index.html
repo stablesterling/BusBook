@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadLine · Kerala Bus Booking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ======================================================
+       RESET & TOKENS
+    ====================================================== */
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+
+    :root{
+      --night:#0a0e1a;
+      --night-2:#0d1225;
+      --panel:#141b33;
+      --panel-2:#1a2242;
+      --border:#283155;
+      --border-hover:#3a467a;
+      --amber:#f5b342;
+      --amber-dim:rgba(245,179,66,0.14);
+      --amber-soft:rgba(245,179,66,0.35);
+      --teal:#2dd6c4;
+      --teal-dim:rgba(45,214,196,0.14);
+      --coral:#ff5d6c;
+      --coral-dim:rgba(255,93,108,0.14);
+      --text-1:#f0f3fd;
+      --text-2:#a6b0d0;
+      --text-3:#5f6a92;
+      --shadow-sm:0 12px 30px rgba(2,4,12,0.6);
+      --shadow-lg:0 30px 70px rgba(2,4,12,0.75);
+      --radius:1rem;
+      --gradient-glow: radial-gradient(circle at 20% 30%, rgba(245,179,66,0.06), transparent 70%);
+    }
+    body{
+      font-family:'Inter',sans-serif;
+      background:var(--night);
+      color:var(--text-1);
+      line-height:1.6;
+      overflow-x:hidden;
+    }
+    .display{ font-family:'Space Grotesk',sans-serif; }
+    .mono{ font-family:'IBM Plex Mono',monospace; }
+    img,svg{ display:block; max-width:100%; }
+    button{ font-family:inherit; }
+    input,select{ font-family:inherit; }
+    ::selection{ background:var(--amber); color:#0a0c14; }
+    :focus-visible{ outline:2px solid var(--amber); outline-offset:3px; border-radius:4px; }
+    @media (prefers-reduced-motion: reduce){
+      *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+    }
+
+    /* ======================================================
+       UTILITY
+    ====================================================== */
+    .container{ max-width:1260px; margin:0 auto; padding:0 2rem; }
+    .section-padding{ padding:6rem 0; }
+    .eyebrow{
+      display:inline-flex; align-items:center; gap:0.6rem;
+      font-family:'IBM Plex Mono',monospace; font-size:0.76rem; font-weight:500;
+      letter-spacing:0.14em; text-transform:uppercase; color:var(--amber);
+      margin-bottom:1rem;
+    }
+    .eyebrow::before{ content:''; width:22px; height:2px; background:var(--amber); display:inline-block; }
+    .section-title{
+      font-family:'Space Grotesk',sans-serif; font-weight:700;
+      font-size:2.8rem; line-height:1.08; letter-spacing:-0.01em;
+      margin-bottom:0.9rem; color:var(--text-1);
+    }
+    .section-subtitle{ font-size:1.05rem; color:var(--text-2); max-width:600px; }
+    .text-center{ text-align:center; }
+    .reveal{ opacity:0; transform:translateY(28px); transition:opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1); }
+    .reveal.is-visible{ opacity:1; transform:translateY(0); }
+
+    /* buttons */
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:0.6rem;
+      padding:0.9rem 2rem; border-radius:0.7rem; font-weight:700; font-size:0.92rem;
+      cursor:pointer; transition:all 0.25s cubic-bezier(.2,.7,.2,1); text-decoration:none;
+      border:1.5px solid transparent; white-space:nowrap;
+    }
+    .btn-amber{ background:var(--amber); color:#181005; box-shadow:0 10px 28px rgba(245,179,66,0.25); }
+    .btn-amber:hover{ transform:translateY(-3px); box-shadow:0 18px 38px rgba(245,179,66,0.35); background:#fcc45a; }
+    .btn-teal{ background:var(--teal); color:#04211d; box-shadow:0 10px 28px rgba(45,214,196,0.22); }
+    .btn-teal:hover{ transform:translateY(-3px); background:#5ce7d9; }
+    .btn-ghost{ background:transparent; color:var(--text-1); border-color:var(--border-hover); }
+    .btn-ghost:hover{ border-color:var(--amber); color:var(--amber); }
+    .btn-outline-sm{ background:transparent; color:var(--text-2); border-color:var(--border-hover); padding:0.6rem 1.2rem; font-size:0.82rem; border-radius:0.6rem; }
+    .btn-outline-sm:hover{ border-color:var(--teal); color:var(--teal); }
+    .btn:disabled{ opacity:0.45; cursor:not-allowed; transform:none !important; box-shadow:none !important; }
+    .btn-block{ width:100%; justify-content:center; }
+
+    /* ======================================================
+       NAV
+    ====================================================== */
+    .navbar{
+      padding:1.1rem 0; background:rgba(10,14,26,0.78); backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border); position:sticky; top:0; z-index:300;
+      transition:padding 0.3s ease, background 0.3s ease;
+    }
+    .navbar.scrolled{ padding:0.6rem 0; background:rgba(10,14,26,0.96); }
+    .nav-inner{ display:flex; align-items:center; justify-content:space-between; gap:1.2rem; }
+    .logo{ display:flex; align-items:center; gap:0.6rem; text-decoration:none; }
+    .logo .logo-mark{
+      width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--amber),#f58a2e);
+      display:flex; align-items:center; justify-content:center; color:#160e02; font-size:1rem;
+      box-shadow:0 6px 18px rgba(245,179,66,0.3);
+    }
+    .logo .logo-text{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; letter-spacing:-0.01em; color:var(--text-1); }
+    .logo .logo-text span{ color:var(--amber); }
+    .nav-links{ display:flex; align-items:center; gap:2.2rem; list-style:none; }
+    .nav-links a{ text-decoration:none; color:var(--text-2); font-weight:600; font-size:0.9rem; transition:color 0.2s; position:relative; }
+    .nav-links a:not(.nav-btn)::after{ content:''; position:absolute; bottom:-6px; left:0; width:0; height:2px; background:var(--amber); transition:width 0.3s ease; }
+    .nav-links a:not(.nav-btn):hover{ color:var(--text-1); }
+    .nav-links a:not(.nav-btn):hover::after{ width:100%; }
+    .nav-actions{ display:flex; align-items:center; gap:0.7rem; }
+    .nav-toggle{ display:none; background:none; border:none; color:var(--text-1); font-size:1.3rem; cursor:pointer; }
+    .user-chip{
+      display:none; align-items:center; gap:0.6rem; padding:0.4rem 0.9rem 0.4rem 0.4rem;
+      border:1.5px solid var(--border-hover); border-radius:60px; cursor:pointer; background:var(--panel);
+    }
+    .user-chip .avatar{ width:30px; height:30px; border-radius:50%; background:var(--teal-dim); color:var(--teal); display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; }
+    .user-chip span{ font-size:0.85rem; font-weight:600; color:var(--text-1); }
+
+    /* ======================================================
+       HERO
+    ====================================================== */
+    .hero{
+      padding:4.8rem 0 6rem; position:relative; overflow:hidden;
+      background:
+        radial-gradient(ellipse 1000px 500px at 80% -10%, rgba(245,179,66,0.08), transparent 60%),
+        radial-gradient(ellipse 700px 450px at -10% 110%, rgba(45,214,196,0.06), transparent 60%),
+        var(--night);
+      border-bottom:1px solid var(--border);
+    }
+    .hero-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:3.5rem; align-items:center; }
+    .hero-copy h1{
+      font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:3.8rem; line-height:1.05;
+      letter-spacing:-0.015em; margin-bottom:1.2rem; color:var(--text-1);
+    }
+    .hero-copy h1 .hl{ color:var(--amber); }
+    .hero-copy p{ font-size:1.1rem; color:var(--text-2); max-width:480px; margin-bottom:1.8rem; }
+    .hero-badges{ display:flex; gap:0.8rem; flex-wrap:wrap; margin-bottom:2.2rem; }
+    .hero-badge{
+      display:flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; border-radius:60px;
+      background:var(--panel); border:1px solid var(--border); font-size:0.8rem; color:var(--text-2); font-weight:600;
+    }
+    .hero-badge i{ color:var(--teal); }
+
+    .route-svg{ width:100%; height:auto; }
+    .route-path{ fill:none; stroke:var(--border-hover); stroke-width:2; stroke-dasharray:6 8; }
+    .route-glow{ fill:none; stroke:var(--teal); stroke-width:2.5; stroke-dasharray:1400; stroke-dashoffset:1400; animation:draw-route 4s ease-in-out infinite; filter:drop-shadow(0 0 12px rgba(45,214,196,0.5)); }
+    @keyframes draw-route{ 0%{ stroke-dashoffset:1400; } 60%{ stroke-dashoffset:0; } 100%{ stroke-dashoffset:-1400; } }
+    .route-city{ fill:var(--panel-2); stroke:var(--border-hover); stroke-width:1.5; }
+    .route-city-dot{ fill:var(--amber); }
+    .route-city-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; fill:var(--text-2); }
+
+    /* search widget */
+    .search-card{
+      margin-top:-3.8rem; position:relative; z-index:5; background:var(--panel);
+      border:1px solid var(--border); border-radius:1.2rem; padding:1.8rem; box-shadow:var(--shadow-lg);
+    }
+    .search-grid{ display:grid; grid-template-columns:1fr auto 1fr 0.85fr 0.85fr auto; gap:0.9rem; align-items:end; }
+    .search-field label{
+      display:block; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; text-transform:uppercase;
+      letter-spacing:0.09em; color:var(--text-3); margin-bottom:0.5rem;
+    }
+    .field-input, .field-select{
+      width:100%; padding:0.8rem 1rem; border-radius:0.65rem; border:1.5px solid var(--border-hover);
+      background:var(--night-2); color:var(--text-1); font-size:0.9rem; transition:border-color 0.2s ease;
+    }
+    .field-input:focus, .field-select:focus{ outline:none; border-color:var(--amber); }
+    select.field-select{ appearance:none; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23a6b0d0'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 1rem center; padding-right:2.2rem; }
+    .swap-btn{
+      width:44px; height:44px; border-radius:50%; border:1.5px solid var(--border-hover); background:var(--night-2);
+      color:var(--teal); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.25s ease;
+    }
+    .swap-btn:hover{ border-color:var(--teal); transform:rotate(180deg); }
+    .search-submit{ height:48px; }
+
+    .hero-stats{ display:flex; gap:2.8rem; margin-top:2.6rem; flex-wrap:wrap; }
+    .hero-stat .num{ font-family:'Space Grotesk',sans-serif; font-size:1.8rem; font-weight:700; color:var(--amber); }
+    .hero-stat .lbl{ font-size:0.78rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.06em; margin-top:0.15rem; }
+
+    /* ======================================================
+       TICKET-CARD (signature)
+    ====================================================== */
+    .ticket-card{
+      position:relative; background:var(--panel); border:1px solid var(--border); border-radius:1rem;
+      box-shadow:var(--shadow-sm); overflow:visible;
+    }
+    .ticket-card .tc-notch{
+      position:absolute; top:50%; width:22px; height:22px; border-radius:50%; background:var(--night);
+      border:1px solid var(--border); transform:translateY(-50%); z-index:2;
+    }
+    .ticket-card .tc-notch.left{ left:-11px; }
+    .ticket-card .tc-notch.right{ right:-11px; }
+
+    /* ======================================================
+       POPULAR ROUTES
+    ====================================================== */
+    .routes-sec{ background:var(--night-2); border-bottom:1px solid var(--border); }
+    .route-scroll{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.6rem; margin-top:3rem; }
+    .route-card{ padding:1.6rem 1.6rem 1.6rem 1.9rem; transition:transform 0.3s ease, border-color 0.3s ease; cursor:pointer; }
+    .route-card:hover{ transform:translateY(-6px); border-color:var(--border-hover); }
+    .route-card .rc-cities{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .route-card .rc-city{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem; color:var(--text-1); }
+    .route-card .rc-arrow{ color:var(--amber); font-size:0.9rem; }
+    .route-card .rc-meta{ display:flex; gap:1rem; flex-wrap:wrap; font-size:0.8rem; color:var(--text-3); margin-bottom:1rem; }
+    .route-card .rc-meta span{ display:flex; align-items:center; gap:0.35rem; }
+    .route-card .rc-price{ display:flex; align-items:baseline; justify-content:space-between; }
+    .route-card .rc-price .amt{ font-family:'IBM Plex Mono',monospace; color:var(--teal); font-size:1.15rem; font-weight:600; }
+    .route-card .rc-price .from{ font-size:0.72rem; color:var(--text-3); }
+
+    /* ======================================================
+       SEARCH RESULTS
+    ====================================================== */
+    .results-sec{ background:var(--night); border-bottom:1px solid var(--border); display:none; }
+    .results-sec.active{ display:block; }
+    .results-head{ display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:1rem; margin-bottom:2.2rem; }
+    .results-count{ color:var(--text-2); font-size:0.9rem; }
+    .bus-list{ display:flex; flex-direction:column; gap:1.2rem; }
+    .bus-card{ padding:1.5rem 1.9rem; display:grid; grid-template-columns:1.4fr 1.1fr 0.8fr auto; gap:1.4rem; align-items:center; }
+    .bus-card .bc-op{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.05rem; color:var(--text-1); margin-bottom:0.3rem; }
+    .bus-card .bc-type{ display:inline-flex; align-items:center; gap:0.4rem; font-size:0.75rem; color:var(--text-3); background:var(--night-2); border:1px solid var(--border); padding:0.25rem 0.6rem; border-radius:60px; }
+    .bus-card .bc-amenities{ display:flex; gap:0.5rem; margin-top:0.6rem; }
+    .bus-card .bc-amenities i{ color:var(--teal); font-size:0.85rem; }
+    .bus-card .bc-time{ text-align:center; }
+    .bus-card .bc-time .t{ font-family:'IBM Plex Mono',monospace; font-size:1.15rem; font-weight:600; color:var(--text-1); }
+    .bus-card .bc-time .c{ font-size:0.72rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.05em; }
+    .bus-card .bc-route{ display:flex; align-items:center; justify-content:center; gap:0.5rem; margin:0.3rem 0; }
+    .bus-card .bc-route .line{ width:60px; height:1px; background:var(--border-hover); position:relative; }
+    .bus-card .bc-route .line::after{ content:'\f090'; font-family:'Font Awesome 6 Free'; font-weight:900; font-size:0.65rem; color:var(--amber); position:absolute; right:-4px; top:-6px; }
+    .bus-card .bc-dur{ font-size:0.72rem; color:var(--text-3); text-align:center; }
+    .bus-card .bc-seats{ text-align:center; }
+    .bus-card .bc-seats .n{ font-family:'IBM Plex Mono',monospace; font-size:1.05rem; font-weight:600; }
+    .bus-card .bc-seats .n.low{ color:var(--coral); }
+    .bus-card .bc-seats .n.ok{ color:var(--teal); }
+    .bus-card .bc-price-box{ text-align:right; }
+    .bus-card .bc-price-box .amt{ font-family:'IBM Plex Mono',monospace; font-size:1.4rem; font-weight:700; color:var(--amber); }
+    .bus-card .bc-price-box .per{ font-size:0.72rem; color:var(--text-3); margin-bottom:0.7rem; }
+    .empty-results{ text-align:center; padding:3.5rem 1rem; color:var(--text-3); }
+    .empty-results i{ font-size:2.2rem; color:var(--border-hover); margin-bottom:1rem; }
+
+    /* ======================================================
+       HOW IT WORKS
+    ====================================================== */
+    .how-sec{ background:var(--night-2); border-bottom:1px solid var(--border); }
+    .how-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1.6rem; margin-top:3rem; }
+    .how-card{ padding:2rem; position:relative; }
+    .how-card .step-no{ font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--amber); margin-bottom:1rem; }
+    .how-card i{ font-size:1.7rem; color:var(--teal); margin-bottom:1rem; }
+    .how-card h4{ font-family:'Space Grotesk',sans-serif; font-size:1.15rem; margin-bottom:0.45rem; }
+    .how-card p{ color:var(--text-3); font-size:0.88rem; }
+
+    /* ======================================================
+       TRUST / FEATURES
+    ====================================================== */
+    .features-sec{ background:var(--night); }
+    .features-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.4rem; margin-top:3rem; }
+    .feature-card{ padding:1.8rem 1.5rem; text-align:left; }
+    .feature-card i{ font-size:1.5rem; color:var(--amber); margin-bottom:0.9rem; }
+    .feature-card h4{ font-size:1rem; margin-bottom:0.35rem; color:var(--text-1); }
+    .feature-card p{ color:var(--text-3); font-size:0.82rem; }
+
+    /* ======================================================
+       ADMIN
+    ====================================================== */
+    .admin-sec{ background:var(--night-2); border-top:1px solid var(--border); display:none; }
+    .admin-sec.active{ display:block; }
+    .admin-head{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+    .admin-stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:1.2rem; margin-bottom:2.6rem; }
+    .admin-stat{ padding:1.4rem 1.5rem; }
+    .admin-stat .num{ font-family:'Space Grotesk',sans-serif; font-size:1.9rem; font-weight:700; color:var(--teal); }
+    .admin-stat .lbl{ font-size:0.78rem; color:var(--text-3); margin-top:0.2rem; }
+    .admin-panel{ display:grid; grid-template-columns:0.85fr 1.15fr; gap:1.6rem; align-items:start; }
+    .admin-form-card{ padding:2rem; }
+    .admin-form-card h3{ font-family:'Space Grotesk',sans-serif; font-size:1.3rem; margin-bottom:1.4rem; }
+    .form-row{ display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; }
+    .form-group{ margin-bottom:1.1rem; }
+    .form-group label{ display:block; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); margin-bottom:0.45rem; }
+    .amenity-check{ display:flex; flex-wrap:wrap; gap:0.6rem; }
+    .amenity-check label{ display:flex; align-items:center; gap:0.4rem; font-size:0.8rem; color:var(--text-2); text-transform:none; letter-spacing:0; background:var(--night-2); border:1px solid var(--border); padding:0.4rem 0.7rem; border-radius:60px; cursor:pointer; }
+    .amenity-check input{ accent-color:var(--teal); }
+    .admin-table-card{ padding:1.6rem; max-height:640px; overflow-y:auto; }
+    .admin-table-card::-webkit-scrollbar{ width:6px; }
+    .admin-table-card::-webkit-scrollbar-thumb{ background:var(--border-hover); border-radius:6px; }
+    .admin-table{ width:100%; border-collapse:collapse; font-size:0.83rem; }
+    .admin-table th{ text-align:left; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-3); padding:0.6rem 0.7rem; border-bottom:1px solid var(--border); }
+    .admin-table td{ padding:0.7rem; border-bottom:1px solid var(--border); color:var(--text-2); }
+    .admin-table tr:hover td{ background:var(--panel-2); }
+    .admin-table .del-btn{ background:none; border:none; color:var(--coral); cursor:pointer; font-size:0.9rem; }
+
+    /* ======================================================
+       FOOTER
+    ====================================================== */
+    .footer{ padding:3.4rem 0 2rem; border-top:1px solid var(--border); background:var(--panel); }
+    .footer-grid{ display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:2rem; }
+    .footer-brand p{ color:var(--text-3); max-width:300px; margin-top:0.8rem; font-size:0.88rem; }
+    .footer-links h5{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:1rem; color:var(--text-1); }
+    .footer-links a{ display:block; color:var(--text-3); text-decoration:none; margin-bottom:0.6rem; font-size:0.88rem; transition:color 0.2s; }
+    .footer-links a:hover{ color:var(--amber); }
+    .footer-bottom{ text-align:center; padding-top:2rem; margin-top:2.2rem; border-top:1px solid var(--border); color:var(--text-3); font-size:0.8rem; }
+
+    /* ======================================================
+       MODALS
+    ====================================================== */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(3,4,9,0.85); backdrop-filter:blur(8px);
+      display:none; align-items:center; justify-content:center; z-index:1000; padding:1.5rem; opacity:0; transition:opacity 0.25s ease;
+    }
+    .modal-overlay.open{ display:flex; }
+    .modal-overlay.show{ opacity:1; }
+    .modal-box{
+      background:var(--panel); border:1px solid var(--border); border-radius:1.1rem; padding:2.2rem;
+      max-width:440px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:var(--shadow-lg);
+      transform:translateY(16px) scale(0.97); transition:transform 0.25s ease; position:relative;
+    }
+    .modal-overlay.show .modal-box{ transform:translateY(0) scale(1); }
+    .modal-box.wide{ max-width:780px; }
+    .modal-box::-webkit-scrollbar{ width:6px; }
+    .modal-box::-webkit-scrollbar-thumb{ background:var(--border-hover); border-radius:6px; }
+    .modal-close-x{ position:absolute; top:1.2rem; right:1.3rem; background:none; border:none; color:var(--text-3); font-size:1.15rem; cursor:pointer; }
+    .modal-close-x:hover{ color:var(--text-1); }
+    .modal-box h3{ font-family:'Space Grotesk',sans-serif; font-size:1.55rem; margin-bottom:0.4rem; }
+    .modal-sub{ color:var(--text-3); font-size:0.86rem; margin-bottom:1.6rem; }
+    .auth-tabs{ display:flex; gap:0.5rem; margin-bottom:1.6rem; background:var(--night-2); padding:0.3rem; border-radius:0.7rem; }
+    .auth-tab{ flex:1; text-align:center; padding:0.6rem; border-radius:0.5rem; font-size:0.85rem; font-weight:600; color:var(--text-3); cursor:pointer; transition:all 0.2s ease; }
+    .auth-tab.active{ background:var(--amber); color:#181005; }
+    .field-error{ font-size:0.75rem; color:var(--coral); margin-top:0.35rem; display:none; }
+    .form-group.invalid .field-input{ border-color:var(--coral); }
+    .form-group.invalid .field-error{ display:block; }
+    .admin-badge{ display:inline-flex; align-items:center; gap:0.4rem; font-size:0.72rem; color:var(--coral); background:var(--coral-dim); border:1px solid rgba(255,93,108,0.3); padding:0.3rem 0.6rem; border-radius:60px; margin-bottom:1.2rem; }
+
+    /* seat map modal */
+    .seat-modal-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.6rem; }
+    .seat-map{ background:var(--night-2); border:1px solid var(--border); border-radius:0.9rem; padding:1.4rem; }
+    .seat-map .steer{ text-align:right; color:var(--text-3); font-size:1rem; margin-bottom:0.9rem; }
+    .seat-rows{ display:flex; flex-direction:column; gap:0.55rem; }
+    .seat-row{ display:grid; grid-template-columns:repeat(2,32px) 22px repeat(2,32px); gap:0.4rem; justify-content:center; }
+    .seat{
+      width:32px; height:32px; border-radius:7px 7px 3px 3px; border:1.5px solid var(--border-hover);
+      background:var(--panel); color:var(--text-3); font-family:'IBM Plex Mono',monospace; font-size:0.62rem;
+      display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s ease;
+    }
+    .seat:hover:not(.booked):not(.selected){ border-color:var(--teal); color:var(--text-1); }
+    .seat.selected{ background:var(--amber); border-color:var(--amber); color:#181005; font-weight:700; transform:scale(1.06); }
+    .seat.booked{ background:var(--border); color:var(--text-3); cursor:not-allowed; opacity:0.5; }
+    .seat-legend{ display:flex; gap:1rem; margin-top:1.2rem; flex-wrap:wrap; }
+    .seat-legend .lg{ display:flex; align-items:center; gap:0.45rem; font-size:0.74rem; color:var(--text-3); }
+    .lg-swatch{ width:14px; height:14px; border-radius:4px; border:1.5px solid var(--border-hover); }
+    .lg-swatch.avail{ background:var(--panel); }
+    .lg-swatch.sel{ background:var(--amber); border-color:var(--amber); }
+    .lg-swatch.taken{ background:var(--border); opacity:0.6; }
+    .seat-summary{ display:flex; flex-direction:column; gap:1rem; }
+    .summary-card{ background:var(--night-2); border:1px solid var(--border); border-radius:0.9rem; padding:1.3rem; }
+    .summary-card h4{ font-size:0.9rem; margin-bottom:0.9rem; }
+    .summary-row{ display:flex; justify-content:space-between; font-size:0.84rem; color:var(--text-2); margin-bottom:0.6rem; }
+    .summary-row .val{ color:var(--text-1); font-weight:600; }
+    .summary-total{ display:flex; justify-content:space-between; align-items:baseline; padding-top:0.9rem; border-top:1px dashed var(--border-hover); margin-top:0.3rem; }
+    .summary-total .amt{ font-family:'IBM Plex Mono',monospace; font-size:1.5rem; color:var(--amber); font-weight:700; }
+    .selected-chips{ display:flex; gap:0.4rem; flex-wrap:wrap; }
+    .chip{ font-family:'IBM Plex Mono',monospace; font-size:0.75rem; background:var(--amber-dim); color:var(--amber); border:1px solid var(--amber-soft); padding:0.25rem 0.6rem; border-radius:60px; }
+
+    /* e-ticket */
+    .eticket{ background:linear-gradient(135deg,var(--panel-2),var(--panel)); border:1px solid var(--border-hover); border-radius:1rem; padding:1.8rem; position:relative; overflow:hidden; }
+    .eticket::before{ content:''; position:absolute; top:0; right:0; width:130px; height:130px; background:radial-gradient(circle,rgba(245,179,66,0.16),transparent 70%); }
+    .eticket-head{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.4rem; }
+    .eticket-head .op{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.2rem; }
+    .eticket-head .pnr{ font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--teal); text-align:right; }
+    .eticket-route{ display:flex; align-items:center; justify-content:space-between; margin-bottom:1.2rem; }
+    .eticket-route .city{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.4rem; }
+    .eticket-route .time{ font-family:'IBM Plex Mono',monospace; font-size:0.8rem; color:var(--text-3); }
+    .eticket-route .mid{ flex:1; text-align:center; padding:0 1rem; color:var(--text-3); font-size:0.72rem; }
+    .eticket-route .mid i{ color:var(--amber); display:block; margin-bottom:0.3rem; }
+    .eticket-divider{ border-top:2px dashed var(--border-hover); margin:1.2rem 0; position:relative; }
+    .eticket-divider::before, .eticket-divider::after{ content:''; position:absolute; top:-11px; width:22px; height:22px; border-radius:50%; background:var(--night); }
+    .eticket-divider::before{ left:-1.8rem; }
+    .eticket-divider::after{ right:-1.8rem; }
+    .eticket-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1rem; }
+    .eticket-grid .g-lbl{ font-family:'IBM Plex Mono',monospace; font-size:0.65rem; text-transform:uppercase; color:var(--text-3); margin-bottom:0.3rem; }
+    .eticket-grid .g-val{ font-weight:600; font-size:0.9rem; }
+    .eticket-code{ display:flex; align-items:center; justify-content:center; gap:2px; padding:1rem 0 0.3rem; }
+    .eticket-code span{ display:inline-block; width:3px; background:var(--text-1); }
+
+    /* toast */
+    .toast{
+      position:fixed; bottom:1.6rem; right:1.6rem; z-index:1200; background:var(--panel);
+      border:1px solid var(--teal); border-radius:0.8rem; padding:1rem 1.3rem; display:flex; align-items:center; gap:0.7rem;
+      box-shadow:var(--shadow-lg); transform:translateY(20px); opacity:0; pointer-events:none; transition:all 0.3s ease;
+    }
+    .toast.show{ transform:translateY(0); opacity:1; }
+    .toast i{ color:var(--teal); font-size:1.1rem; }
+
+    /* ======================================================
+       RESPONSIVE
+    ====================================================== */
+    @media (max-width:1080px){
+      .hero-grid{ grid-template-columns:1fr; }
+      .route-art{ order:-1; max-width:520px; margin:0 auto; }
+      .search-grid{ grid-template-columns:1fr 1fr; }
+      .swap-btn{ display:none; }
+      .route-scroll{ grid-template-columns:1fr 1fr; }
+      .how-grid{ grid-template-columns:1fr 1fr; }
+      .features-grid{ grid-template-columns:1fr 1fr; }
+      .admin-panel{ grid-template-columns:1fr; }
+      .admin-stats{ grid-template-columns:1fr 1fr; }
+      .bus-card{ grid-template-columns:1fr; text-align:left; gap:0.9rem; }
+      .bus-card .bc-price-box{ text-align:left; }
+      .seat-modal-grid{ grid-template-columns:1fr; }
+    }
+    @media (max-width:650px){
+      .container{ padding:0 1.2rem; }
+      .section-padding{ padding:3.6rem 0; }
+      .section-title{ font-size:2rem; }
+      .hero-copy h1{ font-size:2.3rem; }
+      .search-grid{ grid-template-columns:1fr; }
+      .search-submit{ width:100%; }
+      .route-scroll{ grid-template-columns:1fr; }
+      .how-grid{ grid-template-columns:1fr; }
+      .features-grid{ grid-template-columns:1fr; }
+      .footer-grid{ grid-template-columns:1fr; gap:1.6rem; }
+      .nav-links{
+        position:fixed; top:64px; left:0; right:0; background:rgba(10,14,26,0.98); backdrop-filter:blur(14px);
+        flex-direction:column; align-items:flex-start; padding:1.6rem 2rem; gap:1.2rem;
+        border-bottom:1px solid var(--border); transform:translateY(-140%); transition:transform 0.35s ease; z-index:250;
+      }
+      .nav-links.open{ transform:translateY(0); }
+      .nav-toggle{ display:block; }
+      .form-row{ grid-template-columns:1fr; }
+      .admin-stats{ grid-template-columns:1fr 1fr; }
+      .eticket-grid{ grid-template-columns:1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ======================================================
+     NAV
+====================================================== -->
+<nav class="navbar" id="navbar">
+  <div class="container nav-inner">
+    <a href="#" class="logo" onclick="showPublicView();"><span class="logo-mark"><i class="fas fa-bus"></i></span><span class="logo-text">Road<span>Line</span></span></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#search" onclick="showPublicView();">Search</a></li>
+      <li><a href="#routes" onclick="showPublicView();">Popular Routes</a></li>
+      <li><a href="#how" onclick="showPublicView();">How it Works</a></li>
+      <li id="navAdminLink" style="display:none;"><a href="#admin" onclick="showAdminView();"><i class="fas fa-gauge-high"></i> Admin Panel</a></li>
+    </ul>
+    <div class="nav-actions">
+      <div id="loggedOutActions" style="display:flex; gap:0.6rem;">
+        <button class="btn btn-outline-sm" id="navLoginBtn"><i class="fas fa-right-to-bracket"></i> Log In</button>
+        <button class="btn btn-amber" id="navRegisterBtn" style="padding:0.6rem 1.1rem; font-size:0.82rem;"><i class="fas fa-ticket"></i> Register</button>
+      </div>
+      <div class="user-chip" id="userChip">
+        <span class="avatar" id="userAvatar">U</span>
+        <span id="userChipName">User</span>
+        <i class="fas fa-chevron-down" style="font-size:0.65rem;color:var(--text-3);"></i>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ======================================================
+     PUBLIC VIEW
+====================================================== -->
+<div id="publicView">
+
+  <section class="hero" id="search">
+    <div class="container hero-grid">
+      <div class="hero-copy reveal">
+        <div class="eyebrow"><i class="fas fa-route" style="margin-right:6px;"></i> 500+ routes · Kerala & beyond</div>
+        <h1>Book Your Bus,<br>Arrive in <span class="hl">God's Own Country</span></h1>
+        <p>Compare operators, pick your exact seat, and lock in your fare in under two minutes — up to 6 seats per booking.</p>
+        <div class="hero-badges">
+          <div class="hero-badge"><i class="fas fa-shield-halved"></i> Secure checkout</div>
+          <div class="hero-badge"><i class="fas fa-rotate-left"></i> Free cancellation</div>
+          <div class="hero-badge"><i class="fas fa-headset"></i> 24/7 support</div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num" id="statRoutes">0</div><div class="lbl">Live routes</div></div>
+          <div class="hero-stat"><div class="num" id="statCities">0</div><div class="lbl">Cities covered</div></div>
+          <div class="hero-stat"><div class="num" id="statBooked">0</div><div class="lbl">Seats booked today</div></div>
+        </div>
+      </div>
+      <div class="route-art reveal">
+        <svg class="route-svg" viewBox="0 0 460 360" xmlns="http://www.w3.org/2000/svg">
+          <path class="route-path" d="M60,300 C 120,300 100,210 170,190 S 260,120 230,80 S 340,70 400,60"/>
+          <path class="route-glow" d="M60,300 C 120,300 100,210 170,190 S 260,120 230,80 S 340,70 400,60"/>
+          <circle class="route-city" cx="60" cy="300" r="16"/>
+          <circle class="route-city-dot" cx="60" cy="300" r="4"/>
+          <text class="route-city-label" x="34" y="328">TVM</text>
+          <circle class="route-city" cx="170" cy="190" r="12"/>
+          <circle class="route-city-dot" cx="170" cy="190" r="3"/>
+          <text class="route-city-label" x="150" y="212">EKM</text>
+          <circle class="route-city" cx="230" cy="80" r="12"/>
+          <circle class="route-city-dot" cx="230" cy="80" r="3"/>
+          <text class="route-city-label" x="210" y="65">KZK</text>
+          <circle class="route-city" cx="400" cy="60" r="16"/>
+          <circle class="route-city-dot" cx="400" cy="60" r="4"/>
+          <text class="route-city-label" x="382" y="38">MUM</text>
+          <g>
+            <animateMotion dur="3.6s" repeatCount="indefinite" path="M60,300 C 120,300 100,210 170,190 S 260,120 230,80 S 340,70 400,60"/>
+            <circle r="6" fill="#f5b342"/>
+            <circle r="10" fill="none" stroke="#f5b342" stroke-width="1.5" opacity="0.5"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="container">
+      <form class="search-card reveal" id="searchForm">
+        <div class="search-grid">
+          <div class="search-field">
+            <label><i class="fas fa-location-dot"></i> From</label>
+            <select class="field-select" id="searchFrom" required></select>
+          </div>
+          <button type="button" class="swap-btn" id="swapBtn" aria-label="Swap cities"><i class="fas fa-right-left"></i></button>
+          <div class="search-field">
+            <label><i class="fas fa-flag-checkered"></i> To</label>
+            <select class="field-select" id="searchTo" required></select>
+          </div>
+          <div class="search-field">
+            <label><i class="fas fa-calendar-days"></i> Date</label>
+            <input type="date" class="field-input" id="searchDate" required>
+          </div>
+          <div class="search-field">
+            <label><i class="fas fa-user-group"></i> Passengers</label>
+            <select class="field-select" id="searchPax">
+              <option value="1">1 Passenger</option>
+              <option value="2" selected>2 Passengers</option>
+              <option value="3">3 Passengers</option>
+              <option value="4">4 Passengers</option>
+              <option value="5">5 Passengers</option>
+              <option value="6">6 Passengers</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-amber search-submit"><i class="fas fa-magnifying-glass"></i> Search Buses</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- SEARCH RESULTS -->
+  <section class="results-sec section-padding" id="resultsSec">
+    <div class="container">
+      <div class="results-head">
+        <div>
+          <div class="eyebrow"><i class="fas fa-list" style="margin-right:6px;"></i> Available buses</div>
+          <h2 class="section-title" style="font-size:2rem;margin-bottom:0.2rem;" id="resultsTitle">Search results</h2>
+          <p class="results-count" id="resultsCount"></p>
+        </div>
+        <button class="btn btn-ghost" onclick="clearResults();"><i class="fas fa-xmark"></i> Clear search</button>
+      </div>
+      <div class="bus-list" id="busList"></div>
+    </div>
+  </section>
+
+  <!-- POPULAR ROUTES -->
+  <section class="routes-sec section-padding" id="routes">
+    <div class="container">
+      <div class="text-center reveal">
+        <div class="eyebrow" style="justify-content:center;"><i class="fas fa-fire" style="margin-right:6px;"></i> Trending</div>
+        <h2 class="section-title">Popular Routes</h2>
+        <p class="section-subtitle" style="margin:0 auto;">The journeys travelers book most, updated daily.</p>
+      </div>
+      <div class="route-scroll" id="popularRoutes"></div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-sec section-padding" id="how">
+    <div class="container">
+      <div class="text-center reveal">
+        <div class="eyebrow" style="justify-content:center;"><i class="fas fa-diagram-project" style="margin-right:6px;"></i> Process</div>
+        <h2 class="section-title">Booking in Three Steps</h2>
+        <p class="section-subtitle" style="margin:0 auto;">From search to boarding pass, no paperwork required.</p>
+      </div>
+      <div class="how-grid">
+        <div class="ticket-card how-card reveal">
+          <div class="step-no">STEP 01</div>
+          <i class="fas fa-magnifying-glass-location"></i>
+          <h4>Search your route</h4>
+          <p>Pick your cities and travel date to see every operator running that night.</p>
+        </div>
+        <div class="ticket-card how-card reveal">
+          <div class="step-no">STEP 02</div>
+          <i class="fas fa-chair"></i>
+          <h4>Choose your seats</h4>
+          <p>Tap open seats on the live seat map — book up to 6 in a single order.</p>
+        </div>
+        <div class="ticket-card how-card reveal">
+          <div class="step-no">STEP 03</div>
+          <i class="fas fa-ticket"></i>
+          <h4>Get your e-ticket</h4>
+          <p>Your PNR and boarding details are ready instantly — just show it at the gate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES / TRUST -->
+  <section class="features-sec section-padding">
+    <div class="container">
+      <div class="text-center reveal">
+        <div class="eyebrow" style="justify-content:center;"><i class="fas fa-medal" style="margin-right:6px;"></i> Why RoadLine</div>
+        <h2 class="section-title">Built for Frequent Travelers</h2>
+      </div>
+      <div class="features-grid">
+        <div class="ticket-card feature-card reveal"><i class="fas fa-bolt"></i><h4>Instant confirmation</h4><p>No waiting — seats lock the moment you pay.</p></div>
+        <div class="ticket-card feature-card reveal"><i class="fas fa-tags"></i><h4>Transparent pricing</h4><p>The fare you see is the fare you pay, taxes included.</p></div>
+        <div class="ticket-card feature-card reveal"><i class="fas fa-star"></i><h4>Verified operators</h4><p>Every bus on RoadLine is rated and safety-checked.</p></div>
+        <div class="ticket-card feature-card reveal"><i class="fas fa-mobile-screen-button"></i><h4>Mobile boarding</h4><p>Skip the printer — your e-ticket works straight from your phone.</p></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ======================================================
+     ADMIN VIEW
+====================================================== -->
+<div id="adminView" class="admin-sec section-padding">
+  <div class="container">
+    <div class="admin-head">
+      <div>
+        <div class="eyebrow"><i class="fas fa-gauge-high" style="margin-right:6px;"></i> Admin console</div>
+        <h2 class="section-title" style="font-size:2rem;margin-bottom:0.2rem;">Fleet & Route Management</h2>
+        <p class="section-subtitle">Add new buses to the network and monitor bookings as they come in.</p>
+      </div>
+      <button class="btn btn-ghost" onclick="showPublicView();"><i class="fas fa-arrow-left"></i> Back to site</button>
+    </div>
+
+    <div class="admin-stats">
+      <div class="ticket-card admin-stat"><div class="num" id="adminStatBuses">0</div><div class="lbl">Buses in network</div></div>
+      <div class="ticket-card admin-stat"><div class="num" id="adminStatSeats">0</div><div class="lbl">Total seat capacity</div></div>
+      <div class="ticket-card admin-stat"><div class="num" id="adminStatBooked">0</div><div class="lbl">Seats booked</div></div>
+      <div class="ticket-card admin-stat"><div class="num" id="adminStatRevenue">₹0</div><div class="lbl">Revenue booked</div></div>
+    </div>
+
+    <div class="admin-panel">
+      <div class="ticket-card admin-form-card">
+        <h3><i class="fas fa-circle-plus" style="color:var(--amber);margin-right:6px;"></i>Add New Bus</h3>
+        <form id="addBusForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Operator name</label>
+              <input type="text" class="field-input" id="busOperator" placeholder="Kerala Travels" required>
+            </div>
+            <div class="form-group">
+              <label>Bus type</label>
+              <select class="field-select" id="busType">
+                <option>AC Seater</option>
+                <option>AC Sleeper</option>
+                <option>Non-AC Seater</option>
+                <option>Volvo Multi-Axle</option>
+                <option>Luxury AC Sleeper</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>From</label>
+              <select class="field-select" id="busFrom"></select>
+            </div>
+            <div class="form-group">
+              <label>To</label>
+              <select class="field-select" id="busTo"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Travel date</label>
+              <input type="date" class="field-input" id="busDate" required>
+            </div>
+            <div class="form-group">
+              <label>Departure time</label>
+              <input type="time" class="field-input" id="busDepTime" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Arrival time</label>
+              <input type="time" class="field-input" id="busArrTime" required>
+            </div>
+            <div class="form-group">
+              <label>Fare per seat (₹)</label>
+              <input type="number" class="field-input" id="busPrice" placeholder="899" min="1" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Total seats</label>
+            <select class="field-select" id="busSeats">
+              <option value="24">24 seats</option>
+              <option value="32">32 seats</option>
+              <option value="36" selected>36 seats</option>
+              <option value="40">40 seats</option>
+              <option value="44">44 seats</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amenities</label>
+            <div class="amenity-check">
+              <label><input type="checkbox" value="wifi" checked> <i class="fas fa-wifi"></i> WiFi</label>
+              <label><input type="checkbox" value="charging" checked> <i class="fas fa-bolt"></i> Charging</label>
+              <label><input type="checkbox" value="blanket"> <i class="fas fa-mug-hot"></i> Blanket</label>
+              <label><input type="checkbox" value="water"> <i class="fas fa-bottle-water"></i> Water</label>
+              <label><input type="checkbox" value="tv"> <i class="fas fa-tv"></i> Entertainment</label>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-teal btn-block" style="margin-top:0.6rem;"><i class="fas fa-plus"></i> Add Bus to Network</button>
+        </form>
+      </div>
+
+      <div class="ticket-card admin-table-card">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:1.15rem;margin-bottom:1.1rem;"><i class="fas fa-bus" style="color:var(--teal);margin-right:6px;"></i>Active Fleet</h3>
+        <table class="admin-table">
+          <thead>
+            <tr><th>Operator</th><th>Route</th><th>Date</th><th>Seats</th><th>Fare</th><th></th></tr>
+          </thead>
+          <tbody id="adminBusTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     FOOTER
+====================================================== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo"><span class="logo-mark"><i class="fas fa-bus"></i></span><span class="logo-text">Road<span>Line</span></span></a>
+        <p>Booking long-distance bus travel across Kerala and beyond, one seat at a time.</p>
+      </div>
+      <div class="footer-links"><h5>Explore</h5><a href="#search" onclick="showPublicView();">Search buses</a><a href="#routes" onclick="showPublicView();">Popular routes</a><a href="#how" onclick="showPublicView();">How it works</a></div>
+      <div class="footer-links"><h5>Company</h5><a href="#">About us</a><a href="#">Careers</a><a href="#">Contact</a></div>
+      <div class="footer-links"><h5>Operators</h5><a href="#" id="footerAdminLink">Admin portal</a><a href="#">Partner with us</a><a href="#">Operator support</a></div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 RoadLine Travels. All rights reserved. Demo prototype — no real payments are processed.</div>
+  </div>
+</footer>
+
+<!-- ======================================================
+     AUTH MODAL (user)
+====================================================== -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close-x" onclick="closeModal('authModal')"><i class="fas fa-times"></i></button>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Log In</div>
+      <div class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Register</div>
+    </div>
+
+    <form id="loginForm">
+      <h3>Welcome back</h3>
+      <p class="modal-sub">Log in to book seats and manage your trips.</p>
+      <div class="form-group" id="fg-loginEmail">
+        <label>Email</label>
+        <input type="email" class="field-input" id="loginEmail" placeholder="you@example.com">
+        <div class="field-error">Enter a valid email.</div>
+      </div>
+      <div class="form-group" id="fg-loginPass">
+        <label>Password</label>
+        <input type="password" class="field-input" id="loginPass" placeholder="••••••••">
+        <div class="field-error">Enter your password.</div>
+      </div>
+      <button type="submit" class="btn btn-amber btn-block"><i class="fas fa-right-to-bracket"></i> Log In</button>
+      <p style="text-align:center;font-size:0.78rem;color:var(--text-3);margin-top:1rem;">No account yet? <a href="#" style="color:var(--teal);" onclick="switchAuthTab('register');return false;">Register here</a></p>
+    </form>
+
+    <form id="registerForm" style="display:none;">
+      <h3>Create your account</h3>
+      <p class="modal-sub">Join RoadLine to start booking bus tickets.</p>
+      <div class="form-group" id="fg-regName">
+        <label>Full name</label>
+        <input type="text" class="field-input" id="regName" placeholder="Jordan Lee">
+        <div class="field-error">Please enter your name.</div>
+      </div>
+      <div class="form-group" id="fg-regEmail">
+        <label>Email</label>
+        <input type="email" class="field-input" id="regEmail" placeholder="you@example.com">
+        <div class="field-error">Enter a valid email.</div>
+      </div>
+      <div class="form-group" id="fg-regPhone">
+        <label>Phone number</label>
+        <input type="tel" class="field-input" id="regPhone" placeholder="98765 43210">
+        <div class="field-error">Enter a valid phone number.</div>
+      </div>
+      <div class="form-group" id="fg-regPass">
+        <label>Password</label>
+        <input type="password" class="field-input" id="regPass" placeholder="Min. 6 characters">
+        <div class="field-error">Password must be at least 6 characters.</div>
+      </div>
+      <button type="submit" class="btn btn-amber btn-block"><i class="fas fa-user-plus"></i> Create Account</button>
+      <p style="text-align:center;font-size:0.78rem;color:var(--text-3);margin-top:1rem;">Already have an account? <a href="#" style="color:var(--teal);" onclick="switchAuthTab('login');return false;">Log in</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- ======================================================
+     ADMIN LOGIN MODAL
+====================================================== -->
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal-box">
+    <button class="modal-close-x" onclick="closeModal('adminLoginModal')"><i class="fas fa-times"></i></button>
+    <div class="admin-badge"><i class="fas fa-shield-halved"></i> Restricted access</div>
+    <h3>Admin Portal</h3>
+    <p class="modal-sub">Sign in with your operator credentials to manage the fleet.</p>
+    <form id="adminLoginForm">
+      <div class="form-group" id="fg-adminUser">
+        <label>Admin username</label>
+        <input type="text" class="field-input" id="adminUser" placeholder="admin">
+        <div class="field-error">Enter the admin username.</div>
+      </div>
+      <div class="form-group" id="fg-adminPass">
+        <label>Admin password</label>
+        <input type="password" class="field-input" id="adminPass" placeholder="••••••••">
+        <div class="field-error">Incorrect username or password.</div>
+      </div>
+      <button type="submit" class="btn btn-teal btn-block"><i class="fas fa-gauge-high"></i> Enter Admin Panel</button>
+      <p style="text-align:center;font-size:0.74rem;color:var(--text-3);margin-top:1rem;">Demo credentials: <span class="mono" style="color:var(--text-2);">admin / admin123</span></p>
+    </form>
+  </div>
+</div>
+
+<!-- ======================================================
+     SEAT SELECTION MODAL
+====================================================== -->
+<div class="modal-overlay" id="seatModal">
+  <div class="modal-box wide">
+    <button class="modal-close-x" onclick="closeModal('seatModal')"><i class="fas fa-times"></i></button>
+    <h3 id="seatModalTitle">Select your seats</h3>
+    <p class="modal-sub" id="seatModalSub">Choose up to 6 seats for this journey.</p>
+    <div class="seat-modal-grid">
+      <div class="seat-map">
+        <div class="steer"><i class="fas fa-steering-wheel"></i></div>
+        <div class="seat-rows" id="seatRows"></div>
+        <div class="seat-legend">
+          <div class="lg"><span class="lg-swatch avail"></span> Available</div>
+          <div class="lg"><span class="lg-swatch sel"></span> Selected</div>
+          <div class="lg"><span class="lg-swatch taken"></span> Booked</div>
+        </div>
+      </div>
+      <div class="seat-summary">
+        <div class="summary-card">
+          <h4><i class="fas fa-chair" style="color:var(--amber);margin-right:6px;"></i>Selected seats</h4>
+          <div class="selected-chips" id="selectedChips"><span style="font-size:0.8rem;color:var(--text-3);">No seats selected yet</span></div>
+        </div>
+        <div class="summary-card">
+          <h4><i class="fas fa-receipt" style="color:var(--teal);margin-right:6px;"></i>Fare summary</h4>
+          <div class="summary-row"><span>Fare per seat</span><span class="val" id="sumFare">₹0</span></div>
+          <div class="summary-row"><span>Seats selected</span><span class="val" id="sumCount">0 / 6</span></div>
+          <div class="summary-total"><span>Total</span><span class="amt" id="sumTotal">₹0</span></div>
+        </div>
+        <button class="btn btn-amber btn-block" id="confirmBookingBtn" disabled><i class="fas fa-lock"></i> Confirm & Book</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================
+     E-TICKET CONFIRMATION MODAL
+====================================================== -->
+<div class="modal-overlay" id="ticketModal">
+  <div class="modal-box">
+    <button class="modal-close-x" onclick="closeModal('ticketModal')"><i class="fas fa-times"></i></button>
+    <h3><i class="fas fa-circle-check" style="color:var(--teal);margin-right:8px;"></i>Booking confirmed</h3>
+    <p class="modal-sub">Your e-ticket is ready. Show this at boarding.</p>
+    <div class="eticket" id="eticketBody"></div>
+    <button class="btn btn-ghost btn-block" style="margin-top:1.2rem;" onclick="closeModal('ticketModal')"><i class="fas fa-check"></i> Done</button>
+  </div>
+</div>
+
+<!-- ======================================================
+     TOAST
+====================================================== -->
+<div class="toast" id="toast"><i class="fas fa-circle-check"></i><span id="toastMsg">Done</span></div>
+
+<script>
+/* ============================================================
+   MOCK DATABASE (in-memory only — resets on page reload)
+============================================================ */
+// Expanded Kerala-focused cities
+const CITIES = [
+  'Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Alappuzha',
+  'Kottayam', 'Palakkad', 'Kannur', 'Kollam', 'Malappuram',
+  'Idukki', 'Wayanad', 'Kasaragod', 'Pathanamthitta', 'Mumbai', 'Bengaluru', 'Chennai', 'Hyderabad'
+];
+
+let DB = {
+  buses: [],
+  bookings: [],
+  users: [],
+  nextBusId: 1,
+  nextBookingId: 1001
+};
+
+function seedBuses(){
+  const seed = [
+    { operator:'Kerala State Express', type:'AC Sleeper', from:'Thiruvananthapuram', to:'Kochi', depTime:'20:30', arrTime:'23:15', price:499, totalSeats:36, amenities:['wifi','charging','blanket'], daysOffset:0 },
+    { operator:'Malabar Travels', type:'AC Seater', from:'Kozhikode', to:'Kochi', depTime:'22:00', arrTime:'01:30', price:399, totalSeats:40, amenities:['wifi','charging'], daysOffset:0 },
+    { operator:'GreenLine Express', type:'Volvo Multi-Axle', from:'Thiruvananthapuram', to:'Mumbai', depTime:'19:15', arrTime:'10:30', price:1499, totalSeats:32, amenities:['wifi','charging','tv','blanket'], daysOffset:0 },
+    { operator:'Kerala Voyages', type:'AC Sleeper', from:'Kochi', to:'Bengaluru', depTime:'21:45', arrTime:'07:15', price:799, totalSeats:34, amenities:['wifi','charging','water'], daysOffset:0 },
+    { operator:'Blue Ocean Travels', type:'Non-AC Seater', from:'Alappuzha', to:'Kottayam', depTime:'23:00', arrTime:'01:00', price:199, totalSeats:44, amenities:['charging'], daysOffset:0 },
+    { operator:'Sundaram Coaches', type:'Luxury AC Sleeper', from:'Kannur', to:'Thiruvananthapuram', depTime:'20:00', arrTime:'07:45', price:899, totalSeats:30, amenities:['wifi','charging','blanket','tv'], daysOffset:0 },
+    { operator:'Metro Link', type:'AC Seater', from:'Thrissur', to:'Kozhikode', depTime:'22:30', arrTime:'01:15', price:299, totalSeats:36, amenities:['wifi','charging'], daysOffset:0 },
+    { operator:'Hill Queen Travels', type:'AC Sleeper', from:'Idukki', to:'Kochi', depTime:'18:30', arrTime:'22:00', price:449, totalSeats:32, amenities:['wifi','charging','blanket'], daysOffset:0 },
+    { operator:'Coastal Express', type:'Volvo Multi-Axle', from:'Kollam', to:'Chennai', depTime:'20:15', arrTime:'08:45', price:1299, totalSeats:32, amenities:['wifi','charging','tv'], daysOffset:0 },
+    { operator:'Malabar Magic', type:'AC Sleeper', from:'Palakkad', to:'Kochi', depTime:'21:00', arrTime:'23:45', price:349, totalSeats:36, amenities:['wifi','charging','water'], daysOffset:1 },
+  ];
+  const today = new Date();
+  seed.forEach(s => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + s.daysOffset);
+    const dateStr = d.toISOString().slice(0,10);
+    DB.buses.push({
+      id: DB.nextBusId++,
+      operator: s.operator, type: s.type, from: s.from, to: s.to,
+      date: dateStr, depTime: s.depTime, arrTime: s.arrTime,
+      price: s.price, totalSeats: s.totalSeats, bookedSeats: [],
+      amenities: s.amenities
+    });
+  });
+}
+seedBuses();
+
+let currentUser = null;
+let isAdmin = false;
+let activeBusId = null;
+let selectedSeats = [];
+
+/* ============================================================
+   NAV / SCROLL
+============================================================ */
+const navbar = document.getElementById('navbar');
+const navToggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 30));
+navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting){
+      setTimeout(() => entry.target.classList.add('is-visible'), i * 60);
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.15 });
+revealEls.forEach(el => io.observe(el));
+
+function countUp(el, target, duration){
+  const start = performance.now();
+  function tick(now){
+    const p = Math.min((now-start)/duration, 1);
+    const eased = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.floor(eased*target).toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+var io2 = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting){
+      countUp(document.getElementById('statRoutes'), DB.buses.length, 900);
+      countUp(document.getElementById('statCities'), CITIES.length, 900);
+      countUp(document.getElementById('statBooked'), 0, 900);
+      io2.disconnect();
+    }
+  });
+}, { threshold:0.5 });
+io2.observe(document.querySelector('.hero-stats'));
+
+/* ============================================================
+   MODAL HELPERS
+============================================================ */
+function openModal(id){
+  const m = document.getElementById(id);
+  m.classList.add('open');
+  requestAnimationFrame(() => m.classList.add('show'));
+}
+function closeModal(id){
+  const m = document.getElementById(id);
+  m.classList.remove('show');
+  setTimeout(() => m.classList.remove('open'), 250);
+}
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', (e) => { if (e.target === ov) closeModal(ov.id); });
+});
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function validateField(inputId, groupId, isValid){
+  document.getElementById(groupId).classList.toggle('invalid', !isValid);
+  return isValid;
+}
+
+/* ============================================================
+   AUTH — USER
+============================================================ */
+document.getElementById('navLoginBtn').addEventListener('click', () => { switchAuthTab('login'); openModal('authModal'); });
+document.getElementById('navRegisterBtn').addEventListener('click', () => { switchAuthTab('register'); openModal('authModal'); });
+
+function switchAuthTab(tab){
+  const isLogin = tab === 'login';
+  document.getElementById('tabLogin').classList.toggle('active', isLogin);
+  document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+}
+
+document.getElementById('registerForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const pass = document.getElementById('regPass').value;
+
+  const nameOk = validateField('regName','fg-regName', name.length > 1);
+  const emailOk = validateField('regEmail','fg-regEmail', /^\S+@\S+\.\S+$/.test(email));
+  const phoneOk = validateField('regPhone','fg-regPhone', phone.replace(/\D/g,'').length >= 10);
+  const passOk = validateField('regPass','fg-regPass', pass.length >= 6);
+  if (!(nameOk && emailOk && phoneOk && passOk)) return;
+
+  const user = { id: DB.users.length+1, name, email, phone };
+  DB.users.push(user);
+  currentUser = user;
+  isAdmin = false;
+  closeModal('authModal');
+  updateAuthUI();
+  showToast('Account created — welcome, ' + name.split(' ')[0] + '!');
+});
+
+document.getElementById('loginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const emailOk = validateField('loginEmail','fg-loginEmail', /^\S+@\S+\.\S+$/.test(email));
+  const passOk = validateField('loginPass','fg-loginPass', pass.length > 0);
+  if (!(emailOk && passOk)) return;
+
+  let user = DB.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!user){
+    user = { id: DB.users.length+1, name: email.split('@')[0], email, phone:'' };
+    DB.users.push(user);
+  }
+  currentUser = user;
+  isAdmin = false;
+  closeModal('authModal');
+  updateAuthUI();
+  showToast('Welcome back, ' + user.name.split(' ')[0] + '!');
+});
+
+document.getElementById('userChip').addEventListener('click', () => {
+  if (confirm('Log out of RoadLine?')){
+    currentUser = null;
+    isAdmin = false;
+    updateAuthUI();
+    showPublicView();
+    showToast('Logged out successfully');
+  }
+});
+
+function updateAuthUI(){
+  const loggedOut = document.getElementById('loggedOutActions');
+  const chip = document.getElementById('userChip');
+  const adminLink = document.getElementById('navAdminLink');
+  if (currentUser){
+    loggedOut.style.display = 'none';
+    chip.style.display = 'flex';
+    document.getElementById('userChipName').textContent = currentUser.name.split(' ')[0];
+    document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+  } else {
+    loggedOut.style.display = 'flex';
+    chip.style.display = 'none';
+  }
+  adminLink.style.display = isAdmin ? 'block' : 'none';
+}
+
+/* ============================================================
+   AUTH — ADMIN
+============================================================ */
+document.getElementById('footerAdminLink').addEventListener('click', (e) => { e.preventDefault(); openModal('adminLoginModal'); });
+
+document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const user = document.getElementById('adminUser').value.trim();
+  const pass = document.getElementById('adminPass').value;
+  const ok = (user === 'admin' && pass === 'admin123');
+  validateField('adminUser','fg-adminUser', true);
+  validateField('adminPass','fg-adminPass', ok);
+  if (!ok) return;
+
+  isAdmin = true;
+  if (!currentUser) currentUser = { id:0, name:'Admin', email:'admin@roadline.com' };
+  closeModal('adminLoginModal');
+  updateAuthUI();
+  showAdminView();
+  showToast('Welcome to the admin panel');
+});
+
+/* ============================================================
+   VIEW SWITCHING
+============================================================ */
+function showAdminView(){
+  if (!isAdmin){ openModal('adminLoginModal'); return; }
+  document.getElementById('publicView').style.display = 'none';
+  document.getElementById('adminView').classList.add('active');
+  renderAdminTable();
+  renderAdminStats();
+}
+function showPublicView(){
+  document.getElementById('publicView').style.display = 'block';
+  document.getElementById('adminView').classList.remove('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ============================================================
+   CITY DROPDOWNS
+============================================================ */
+function fillCityDropdown(select, defaultVal){
+  select.innerHTML = CITIES.map(c => `<option value="${c}" ${c===defaultVal?'selected':''}>${c}</option>`).join('');
+}
+fillCityDropdown(document.getElementById('searchFrom'), 'Thiruvananthapuram');
+fillCityDropdown(document.getElementById('searchTo'), 'Kochi');
+fillCityDropdown(document.getElementById('busFrom'), 'Thiruvananthapuram');
+fillCityDropdown(document.getElementById('busTo'), 'Kozhikode');
+
+document.getElementById('searchDate').valueAsDate = new Date();
+document.getElementById('busDate').valueAsDate = new Date();
+
+document.getElementById('swapBtn').addEventListener('click', () => {
+  const f = document.getElementById('searchFrom');
+  const t = document.getElementById('searchTo');
+  const tmp = f.value; f.value = t.value; t.value = tmp;
+});
+
+/* ============================================================
+   AMENITY ICON MAP
+============================================================ */
+const AMENITY_ICON = { wifi:'fa-wifi', charging:'fa-bolt', blanket:'fa-mug-hot', water:'fa-bottle-water', tv:'fa-tv' };
+const AMENITY_LABEL = { wifi:'WiFi', charging:'Charging', blanket:'Blanket', water:'Water', tv:'Entertainment' };
+
+function fmtDate(dateStr){
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+}
+function durationLabel(dep, arr){
+  let [dh,dm] = dep.split(':').map(Number);
+  let [ah,am] = arr.split(':').map(Number);
+  let start = dh*60+dm, end = ah*60+am;
+  if (end <= start) end += 24*60;
+  const diff = end - start;
+  return Math.floor(diff/60) + 'h ' + (diff%60) + 'm';
+}
+
+/* ============================================================
+   SEARCH & RESULTS
+============================================================ */
+document.getElementById('searchForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const from = document.getElementById('searchFrom').value;
+  const to = document.getElementById('searchTo').value;
+  const date = document.getElementById('searchDate').value;
+  if (from === to){ showToast('Origin and destination cannot be the same'); return; }
+  runSearch(from, to, date);
+});
+
+function runSearch(from, to, date){
+  const results = DB.buses.filter(b => b.from === from && b.to === to && b.date === date);
+  renderResults(results, from, to, date);
+  document.getElementById('resultsSec').classList.add('active');
+  document.getElementById('resultsSec').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function clearResults(){
+  document.getElementById('resultsSec').classList.remove('active');
+}
+
+function renderResults(results, from, to, date){
+  document.getElementById('resultsTitle').textContent = `${from} → ${to}`;
+  document.getElementById('resultsCount').textContent = `${results.length} bus${results.length===1?'':'es'} found · ${fmtDate(date)}`;
+  const list = document.getElementById('busList');
+
+  if (results.length === 0){
+    list.innerHTML = `<div class="ticket-card empty-results"><i class="fas fa-bus-simple"></i><p>No buses found on this route for the selected date.</p><p style="font-size:0.8rem;margin-top:0.4rem;">Try a different date or check our popular routes below.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = results.map(b => {
+    const seatsLeft = b.totalSeats - b.bookedSeats.length;
+    const seatsClass = seatsLeft <= 5 ? 'low' : 'ok';
+    const amenitiesHtml = b.amenities.map(a => `<i class="fas ${AMENITY_ICON[a]}" title="${AMENITY_LABEL[a]}"></i>`).join('');
+    return `
+    <div class="ticket-card bus-card">
+      <div class="tc-notch left"></div><div class="tc-notch right"></div>
+      <div>
+        <div class="bc-op">${b.operator}</div>
+        <span class="bc-type"><i class="fas fa-bus"></i> ${b.type}</span>
+        <div class="bc-amenities">${amenitiesHtml}</div>
+      </div>
+      <div class="bc-time">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div><div class="t">${b.depTime}</div><div class="c">${b.from}</div></div>
+          <div class="bc-route"><div class="line"></div></div>
+          <div><div class="t">${b.arrTime}</div><div class="c">${b.to}</div></div>
+        </div>
+        <div class="bc-dur">${durationLabel(b.depTime,b.arrTime)} journey</div>
+      </div>
+      <div class="bc-seats">
+        <div class="n ${seatsClass}">${seatsLeft}</div>
+        <div class="c" style="font-size:0.7rem;color:var(--text-3);">seats left</div>
+      </div>
+      <div class="bc-price-box">
+        <div class="amt">₹${b.price}</div>
+        <div class="per">per seat</div>
+        <button class="btn btn-amber" style="padding:0.65rem 1.2rem;font-size:0.84rem;" onclick="openSeatModal(${b.id})" ${seatsLeft===0?'disabled':''}>${seatsLeft===0?'Sold Out':'Select Seats'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   POPULAR ROUTES
+============================================================ */
+function renderPopularRoutes(){
+  const routeMap = {};
+  DB.buses.forEach(b => {
+    const key = b.from + '→' + b.to;
+    if (!routeMap[key] || b.price < routeMap[key].price) routeMap[key] = b;
+  });
+  const top = Object.values(routeMap).slice(0,6);
+  document.getElementById('popularRoutes').innerHTML = top.map(b => `
+    <div class="ticket-card route-card" onclick="quickSearch('${b.from}','${b.to}')">
+      <div class="tc-notch left"></div><div class="tc-notch right"></div>
+      <div class="rc-cities">
+        <span class="rc-city">${b.from}</span>
+        <i class="fas fa-arrow-right rc-arrow"></i>
+        <span class="rc-city">${b.to}</span>
+      </div>
+      <div class="rc-meta">
+        <span><i class="fas fa-bus"></i> ${DB.buses.filter(x=>x.from===b.from&&x.to===b.to).length} buses/day</span>
+        <span><i class="fas fa-clock"></i> ${durationLabel(b.depTime,b.arrTime)}</span>
+      </div>
+      <div class="rc-price"><span class="from">Starting from</span><span class="amt">₹${b.price}</span></div>
+    </div>
+  `).join('');
+}
+function quickSearch(from, to){
+  document.getElementById('searchFrom').value = from;
+  document.getElementById('searchTo').value = to;
+  const dateField = document.getElementById('searchDate');
+  if (!dateField.value) dateField.valueAsDate = new Date();
+  runSearch(from, to, dateField.value);
+}
+renderPopularRoutes();
+
+/* ============================================================
+   SEAT SELECTION
+============================================================ */
+function openSeatModal(busId){
+  if (!currentUser){
+    showToast('Please log in to book seats');
+    switchAuthTab('login');
+    openModal('authModal');
+    return;
+  }
+  const bus = DB.buses.find(b => b.id === busId);
+  if (!bus) return;
+  activeBusId = busId;
+  selectedSeats = [];
+
+  document.getElementById('seatModalTitle').textContent = `${bus.operator} · ${bus.from} → ${bus.to}`;
+  document.getElementById('seatModalSub').textContent = `${fmtDate(bus.date)} · Departs ${bus.depTime} · Choose up to 6 seats`;
+  document.getElementById('sumFare').textContent = '₹' + bus.price;
+  renderSeatMap(bus);
+  updateSeatSummary(bus);
+  openModal('seatModal');
+}
+
+function renderSeatMap(bus){
+  const rows = Math.ceil(bus.totalSeats / 4);
+  let seatNum = 1;
+  let html = '';
+  for (let r = 0; r < rows; r++){
+    html += '<div class="seat-row">';
+    for (let c = 0; c < 4; c++){
+      if (seatNum > bus.totalSeats){ html += '<div></div>'; continue; }
+      const rowLetter = String.fromCharCode(65 + r);
+      const label = rowLetter + (c+1);
+      const isBooked = bus.bookedSeats.includes(label);
+      html += `<div class="seat ${isBooked?'booked':''}" data-seat="${label}" onclick="toggleSeat('${label}', this)">${label}</div>`;
+      seatNum++;
+    }
+    html += '</div>';
+  }
+  document.getElementById('seatRows').innerHTML = html;
+}
+
+function toggleSeat(label, el){
+  if (el.classList.contains('booked')) return;
+  const bus = DB.buses.find(b => b.id === activeBusId);
+  if (el.classList.contains('selected')){
+    el.classList.remove('selected');
+    selectedSeats = selectedSeats.filter(s => s !== label);
+  } else {
+    if (selectedSeats.length >= 6){
+      showToast('You can book a maximum of 6 seats per order');
+      return;
+    }
+    el.classList.add('selected');
+    selectedSeats.push(label);
+  }
+  updateSeatSummary(bus);
+}
+
+function updateSeatSummary(bus){
+  const chips = document.getElementById('selectedChips');
+  chips.innerHTML = selectedSeats.length
+    ? selectedSeats.map(s => `<span class="chip">${s}</span>`).join('')
+    : '<span style="font-size:0.8rem;color:var(--text-3);">No seats selected yet</span>';
+  document.getElementById('sumCount').textContent = `${selectedSeats.length} / 6`;
+  document.getElementById('sumTotal').textContent = '₹' + (selectedSeats.length * bus.price);
+  document.getElementById('confirmBookingBtn').disabled = selectedSeats.length === 0;
+}
+
+document.getElementById('confirmBookingBtn').addEventListener('click', () => {
+  const bus = DB.buses.find(b => b.id === activeBusId);
+  if (!bus || selectedSeats.length === 0) return;
+
+  const booking = {
+    id: DB.nextBookingId++,
+    pnr: 'RL' + Math.random().toString(36).slice(2,8).toUpperCase(),
+    userId: currentUser.id,
+    busId: bus.id,
+    seats: [...selectedSeats],
+    total: selectedSeats.length * bus.price,
+    bookedAt: new Date()
+  };
+  bus.bookedSeats.push(...selectedSeats);
+  DB.bookings.push(booking);
+
+  closeModal('seatModal');
+  renderTicket(bus, booking);
+  openModal('ticketModal');
+
+  // refresh live results if the same route is showing
+  const from = document.getElementById('searchFrom').value;
+  const to = document.getElementById('searchTo').value;
+  const date = document.getElementById('searchDate').value;
+  if (document.getElementById('resultsSec').classList.contains('active')){
+    const results = DB.buses.filter(b => b.from === from && b.to === to && b.date === date);
+    renderResults(results, from, to, date);
+  }
+  countUp(document.getElementById('statBooked'), DB.bookings.reduce((a,b)=>a+b.seats.length,0), 600);
+});
+
+function renderTicket(bus, booking){
+  const barsHtml = Array.from({length:34}).map(() => `<span style="height:${18+Math.random()*22}px;width:${Math.random()>0.7?'3px':'1.5px'};"></span>`).join('');
+  document.getElementById('eticketBody').innerHTML = `
+    <div class="eticket-head">
+      <div><div class="op">${bus.operator}</div><span class="bc-type"><i class="fas fa-bus"></i> ${bus.type}</span></div>
+      <div class="pnr">PNR<br><strong style="font-size:1rem;color:var(--text-1);">${booking.pnr}</strong></div>
+    </div>
+    <div class="eticket-route">
+      <div><div class="city">${bus.from}</div><div class="time">${bus.depTime} · ${fmtDate(bus.date)}</div></div>
+      <div class="mid"><i class="fas fa-bus"></i>${durationLabel(bus.depTime,bus.arrTime)}</div>
+      <div style="text-align:right;"><div class="city">${bus.to}</div><div class="time">${bus.arrTime}</div></div>
+    </div>
+    <div class="eticket-divider"></div>
+    <div class="eticket-grid">
+      <div><div class="g-lbl">Passenger</div><div class="g-val">${currentUser.name}</div></div>
+      <div><div class="g-lbl">Seats</div><div class="g-val">${booking.seats.join(', ')}</div></div>
+      <div><div class="g-lbl">Total fare</div><div class="g-val" style="color:var(--amber);">₹${booking.total}</div></div>
+    </div>
+    <div class="eticket-code">${barsHtml}</div>
+  `;
+}
+
+/* ============================================================
+   ADMIN — ADD BUS
+============================================================ */
+document.getElementById('addBusForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const from = document.getElementById('busFrom').value;
+  const to = document.getElementById('busTo').value;
+  if (from === to){ showToast('Origin and destination cannot be the same'); return; }
+
+  const amenities = Array.from(document.querySelectorAll('.amenity-check input:checked')).map(i => i.value);
+  const bus = {
+    id: DB.nextBusId++,
+    operator: document.getElementById('busOperator').value.trim() || 'Kerala Travels',
+    type: document.getElementById('busType').value,
+    from, to,
+    date: document.getElementById('busDate').value,
+    depTime: document.getElementById('busDepTime').value,
+    arrTime: document.getElementById('busArrTime').value,
+    price: Number(document.getElementById('busPrice').value) || 0,
+    totalSeats: Number(document.getElementById('busSeats').value),
+    bookedSeats: [],
+    amenities
+  };
+  DB.buses.push(bus);
+  e.target.reset();
+  document.getElementById('busDate').valueAsDate = new Date();
+  fillCityDropdown(document.getElementById('busFrom'), 'Thiruvananthapuram');
+  fillCityDropdown(document.getElementById('busTo'), 'Kozhikode');
+  document.querySelectorAll('.amenity-check input')[0].checked = true;
+  document.querySelectorAll('.amenity-check input')[1].checked = true;
+
+  renderAdminTable();
+  renderAdminStats();
+  renderPopularRoutes();
+  showToast('Bus added to the network');
+});
+
+function renderAdminTable(){
+  const body = document.getElementById('adminBusTableBody');
+  body.innerHTML = DB.buses.map(b => `
+    <tr>
+      <td>${b.operator}<br><span style="font-size:0.72rem;color:var(--text-3);">${b.type}</span></td>
+      <td>${b.from} → ${b.to}</td>
+      <td>${fmtDate(b.date)}<br><span style="font-size:0.72rem;color:var(--text-3);">${b.depTime}–${b.arrTime}</span></td>
+      <td>${b.totalSeats - b.bookedSeats.length} / ${b.totalSeats}</td>
+      <td>₹${b.price}</td>
+      <td><button class="del-btn" onclick="deleteBus(${b.id})" title="Remove bus"><i class="fas fa-trash"></i></button></td>
+    </tr>
+  `).join('');
+}
+
+function deleteBus(id){
+  if (!confirm('Remove this bus from the network?')) return;
+  DB.buses = DB.buses.filter(b => b.id !== id);
+  renderAdminTable();
+  renderAdminStats();
+  renderPopularRoutes();
+  showToast('Bus removed');
+}
+
+function renderAdminStats(){
+  const totalSeats = DB.buses.reduce((a,b) => a + b.totalSeats, 0);
+  const bookedSeats = DB.buses.reduce((a,b) => a + b.bookedSeats.length, 0);
+  const revenue = DB.bookings.reduce((a,b) => a + b.total, 0);
+  document.getElementById('adminStatBuses').textContent = DB.buses.length;
+  document.getElementById('adminStatSeats').textContent = totalSeats;
+  document.getElementById('adminStatBooked').textContent = bookedSeats;
+  document.getElementById('adminStatRevenue').textContent = '₹' + revenue.toLocaleString();
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+updateAuthUI();
+</script>
+</body>
+</html>
